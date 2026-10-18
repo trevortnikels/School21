@@ -1,0 +1,69 @@
+def read_matrix(filename="input.txt"):
+    with open(filename, "r", encoding="utf-8") as f:
+        return [list(map(int, line.strip().split())) for line in f]
+
+
+def bfs_component(matrix, visited, start_i, start_j):
+    n = len(matrix)
+    q = []
+    q.append((start_i, start_j))
+    visited[start_i][start_j] = True
+    component = [(start_i, start_j)]
+
+    while q:
+        i, j = q.pop(0)
+        for di, dj in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < n and 0 <= nj < n:
+                if matrix[ni][nj] == 1 and not visited[ni][nj]:
+                    visited[ni][nj] = True
+                    q.append((ni, nj))
+                    component.append((ni, nj))
+
+    return component
+
+
+def is_square(component):
+    rows = [r for r, _ in component]
+    cols = [c for _, c in component]
+
+    min_r, max_r = min(rows), max(rows)
+    min_c, max_c = min(cols), max(cols)
+
+    height = max_r - min_r + 1
+    width = max_c - min_c + 1
+
+    if height != width:
+        return False
+
+    component_set = set(component)
+    for i in range(min_r, max_r + 1):
+        for j in range(min_c, max_c + 1):
+            if (i, j) not in component_set:
+                return False
+
+    return True
+
+
+def main():
+    matrix = read_matrix("src/exercise3/input.txt")
+    n = len(matrix)
+    visited = [[False] * n for _ in range(n)]
+
+    squares = 0
+    circles = 0
+
+    for i in range(n):
+        for j in range(n):
+            if matrix[i][j] == 1 and not visited[i][j]:
+                component = bfs_component(matrix, visited, i, j)
+                if is_square(component):
+                    squares += 1
+                else:
+                    circles += 1
+
+    print(squares, circles)
+
+
+if __name__ == "__main__":
+    main()
